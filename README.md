@@ -70,7 +70,7 @@ The system consists of the following components:
 
 4. **Run**:
    - Activate environment: `audio_env\Scripts\activate`
-   - Run: `python main.py`
+   - Run: `python main.py --device-ip <ip>`
 
 ## Usage
 
@@ -101,5 +101,4 @@ The system consists of the following components:
 
 ## License
 
-This project uses open-source models and libraries. Ensure compliance with their licenses (Apache 2.0 for Vosk and YAMNet).</content>
-<parameter name="filePath">c:\data_backup\workspace\audio-surveillance\README.md
+This project uses open-source models and libraries. Ensure compliance with their licenses (Apache 2.0 for Vosk and YAMNet).
