@@ -2,7 +2,19 @@ import subprocess
 
 
 class RTSPAudioStream:
+    """Read raw PCM audio from an RTSP stream using ffmpeg.
+
+    Purpose:
+        Wraps an ffmpeg subprocess to decode RTSP audio into 16-bit PCM bytes.
+
+    Usage:
+        stream = RTSPAudioStream(rtsp_url)
+        data = stream.read()
+        stream.close()
+    """
+
     def __init__(self, rtsp_url, sample_rate=16000, channels=1, chunk_size=16000):
+        """Initialize RTSP audio stream wrapper with FFmpeg settings."""
         self.rtsp_url = rtsp_url
         self.sample_rate = sample_rate
         self.channels = channels
@@ -10,6 +22,7 @@ class RTSPAudioStream:
         self.process = None
 
     def start(self):
+        """Start ffmpeg if needed and return the underlying process handle."""
         if self.process is not None:
             return self.process
 
@@ -39,6 +52,7 @@ class RTSPAudioStream:
         return self.process
 
     def read(self, size=None):
+        """Read raw audio bytes from the RTSP audio stream."""
         process = self.start()
         if process.stdout is None:
             return b""
@@ -46,6 +60,7 @@ class RTSPAudioStream:
         return process.stdout.read(size or self.chunk_size)
 
     def close(self):
+        """Stop the ffmpeg process and release its resources."""
         if self.process is None:
             return
 

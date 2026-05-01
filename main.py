@@ -75,6 +75,10 @@ yamnet_engine = YamnetClassifier()
 # AUDIO CALLBACK
 # =============================
 def audio_callback(indata, frames, time, status):
+    """Callback invoked by sounddevice for each audio block.
+
+    Converts the incoming audio buffer to bytes and enqueues it for later processing.
+    """
     if status:
         print(status)
     # indata is already in the correct format from sounddevice
@@ -82,6 +86,10 @@ def audio_callback(indata, frames, time, status):
 
 
 def rtsp_reader(rtsp_url, stop_event):
+    """Read raw audio from an RTSP source and enqueue it until stopped.
+
+    The thread runs until the stop_event is set, or the stream ends.
+    """
     print(f"RTSP reader started for {rtsp_url}")
     try:
         stream = RTSPAudioStream(rtsp_url, sample_rate=SAMPLE_RATE, channels=1, chunk_size=BLOCK_SIZE_BYTES)
@@ -102,6 +110,10 @@ def rtsp_reader(rtsp_url, stop_event):
 # WORKER THREAD
 # =============================
 def audio_worker():
+    """Continuously process queued audio blocks from the capture source.
+
+    Speech and sound classification results are forwarded to the decision engine.
+    """
     print("Audio worker started...")
 
     while True:
@@ -130,6 +142,7 @@ def audio_worker():
 # DECISION ENGINE
 # =============================
 def normalize_text(text):
+    """Normalize text by stripping punctuation and converting to lowercase."""
     normalized_chars = []
     for ch in text:
         cat = unicodedata.category(ch)
@@ -141,6 +154,7 @@ def normalize_text(text):
 
 
 def decision_engine(text=None, sound_id=None, confidence=None, language=None, label=None):
+    """Evaluate speech or sound detections and decide whether to trigger an alert."""
     alert = False
 
     # Speech trigger
@@ -186,6 +200,7 @@ def decision_engine(text=None, sound_id=None, confidence=None, language=None, la
 # ACTION
 # =============================
 def trigger_action():
+    """Trigger an alert action and optionally send a control command to the configured device."""
     global DEVICE_IP
     print(f"🔴 ACTION: Alarm / Camera / Notification Triggered")
     
@@ -201,37 +216,12 @@ def trigger_action():
     else:
         print("⚠️ No device IP provided. Skipping curl command.")
     
-'''
+
 # =============================
 # MAIN
 # =============================
 def main():
-    parser = argparse.ArgumentParser(description="Feed Vosk and YAMNet from microphone or RTSP audio")
-    parser.add_argument("--rtsp-url", help="RTSP stream URL to decode and analyze")
-    args = parser.parse_args()
-
-    print("Starting system...")
-
-    stream = sd.RawInputStream(
-        samplerate=SAMPLE_RATE,
-        blocksize=BLOCK_SIZE,
-        dtype='int16',
-        channels=1,
-        callback=audio_callback
-    )
-
-    with stream:
-        worker = threading.Thread(target=audio_worker, daemon=True)
-        worker.start()
-
-        print("System running... Press Ctrl+C to stop.")
-        while True:
-            pass
-'''
-# =============================
-# MAIN
-# =============================
-def main():
+    """Parse command line arguments and start audio capture plus processing threads."""
     global DEVICE_IP
     parser = argparse.ArgumentParser(description="Feed Vosk and YAMNet from microphone or RTSP audio")
     parser.add_argument("--rtsp-url", help="RTSP stream URL to decode and analyze")

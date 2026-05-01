@@ -4,7 +4,21 @@ import tensorflow as tf
 import tensorflow_hub as hub
 
 class YamnetClassifier:
+    """Sound classification wrapper for the Yamnet model.
+
+    Purpose:
+        Buffer raw PCM audio bytes, classify them with Yamnet, and expose labels.
+
+    Usage:
+        classifier = YamnetClassifier()
+        result = classifier.process(audio_bytes)
+        if result:
+            class_id, confidence = result
+            label = classifier.label(class_id)
+    """
+
     def __init__(self):
+        """Load the Yamnet model and initialize audio buffering and label mapping."""
         self.model = hub.load("https://tfhub.dev/google/yamnet/1")
         self.buffer = b''
         self.sample_rate = 16000
@@ -29,8 +43,10 @@ class YamnetClassifier:
 
     def process(self, audio_bytes):
         """
-        Accumulate audio and classify every ~1 sec
-        Returns (class_id, confidence) or None
+        Accumulate raw audio and classify it using Yamnet.
+
+        Returns (class_id, confidence) when a segment is classified, or None if
+        more audio data is required.
         """
         self.buffer += audio_bytes
 
